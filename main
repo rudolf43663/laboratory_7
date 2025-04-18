@@ -1,0 +1,131 @@
+class BinaryTree<T> : IEnumerable<T>
+{
+  public class Node
+  {
+    public T Value { get; set; }
+    public Node Left { get; set; }
+    public Node Right { get; set; }
+    public Node Parent { get; set; }
+  }
+
+  public Node Root { get; set; }
+
+  public Node Next(Node current){
+    if (current.Right != null)
+    {
+      return FindLeft(current.Right);
+    }
+    else
+    {
+      return FindParentLeft(current);
+    }
+  }
+
+  public Node Previous(Node current){
+    if (current.Left != null)
+    {
+      return FindRight(current.Left);
+    }
+    else
+    {
+      return FindParentRight(current);
+    }
+  }
+
+  public Node FindLeft(Node currentNode)
+  {
+    while (currentNode.Left != null)
+    {
+      currentNode = currentNode.Left;
+    }
+    return currentNode;
+  }
+
+  public Node FindRight(Node currentNode)
+  {
+    while (currentNode.Right != null)
+    {
+      currentNode = currentNode.Right;
+    }
+    return currentNode;
+  }
+
+  public Node FindParentLeft(Node currentNode)
+  {
+    while (currentNode.Parent != null && currentNode == currentNode.Parent.Right)
+    {
+        currentNode = currentNode.Parent;
+    }
+    return currentNode.Parent;
+  }
+
+  public Node FindParentRight(Node currentNode)
+  {
+    while (currentNode.Parent != null && currentNode == currentNode.Parent.Left)
+    {
+        currentNode = currentNode.Parent;
+    }
+    return currentNode.Parent;
+  }
+        
+  public static Node operator ++(Node current)
+  {
+    if (current == null)
+    {
+      throw new ArgumentNullException("Its cannot be null.");
+    }
+    return current.Next();
+  }
+
+  public static Node operator --(Node current)
+  {
+    if (current == null)
+    {
+      throw new ArgumentNullException("Its cannot be null.");
+    }
+    return current.Previous();
+  }
+
+  public void Add(T value)
+  {
+    Root = Insert(Root, value, null);
+  }
+
+  private Node Insert(Node node, T value, Node parent)
+  {
+    if (node == null) return new Node { Value = value, Parent = parent };
+    int compare = Comparer<T>.Default.Compare(value, node.Value);
+    if (compare < 0) node.Left = Insert(node.Left, value, node);
+    else node.Right = Insert(node.Right, value, node);
+    return node;
+  }
+
+  public IEnumerator<T> GetEnumerator()
+  {
+    return Traverse().GetEnumerator();
+  }
+
+  IEnumerator IEnumerable.GetEnumerator()
+  {
+    return GetEnumerator();
+  }
+
+  public List<T> Traverse()
+  {
+    var result = new List<T>();
+
+    Action<Node> traverse = null;
+    traverse = node =>
+    {
+        if (node == null) return;
+
+        traverse(node.Left);
+        result.Add(node.Value);
+        traverse(node.Right);
+    };
+
+    traverse(Root);
+
+    return result;
+  }
+}
